@@ -1,0 +1,101 @@
+HUB — 3 pedais + relay do volante/câmbio via rádio → USB
+============================================================
+Placa: a dos pedais. ESTA É A ÚNICA NO CABO USB do PC.
+
+FIAÇÃO (imutável) — os 3 sensores iguais (GND→GND, 3V3→VCC):
+  FREIO:      P0 = SIG | P14 = NC
+  ACELERADOR: P1 = SIG | P15 = NC
+  EMBREAGEM:  P2 = SIG | P16 = NC
+
+MATRIZ (ordem exata do carro, esquerda → direita):
+  coluna 0 = EMBREAGEM | coluna 2 = FREIO | coluna 4 = ACELERADOR
+  (colunas 1 e 3 vazias de propósito; mais perto = mais LEDs)
+
+COMO GRAVAR:
+1. makecode.microbit.org → novo projeto → visão JavaScript.
+2. Extensões: adicione "radio" e "sonar".
+3. Apague tudo, cole o código abaixo, Download → arraste o .hex.
+
+SERIAL PARA O TRADUTOR (mm brutos; o PC converte em 0.0–1.0):
+  BRAKE:<mm>  ACCEL:<mm>  CLUTCH:<mm>   (0 = sem eco)
+  + relay do rádio: STEER:<graus>, GEAR:*, SHIFT:*, MODE:*, HANDBRAKE:*
+RÁDIO DE VOLTA: avisa "CLUTCH"=1/0 para o câmbio só trocar embreado.
+
+------------------------------------------------------------
+radio.setGroup(7)
+radio.setTransmitPower(7)
+serial.redirect(
+    SerialPin.USB_TX,
+    SerialPin.USB_RX,
+    BaudRate.BaudRate115200
+)
+
+let embreagemAvisada = false
+
+function lerMM(pino: DigitalPin): number {
+    let valores: number[] = []
+    for (let i = 0; i < 5; i++) {
+        let us = sonar.ping(pino, pino, PingUnit.MicroSeconds, 10)
+        if (us > 0) {
+            valores.push(us / 5.8)
+        }
+        basic.pause(12)
+    }
+    if (valores.length == 0) {
+        return 0
+    }
+    valores.sort((a, b) => a - b)
+    return valores[Math.idiv(valores.length, 2)]
+}
+
+function intensidade(distancia: number): number {
+    if (distancia <= 0) {
+        return 0
+    }
+    return Math.constrain(Math.map(distancia, 500, 50, 0, 5), 0, 5)
+}
+
+function barra(col: number, nivel: number) {
+    for (let y = 4; y >= 5 - nivel; y--) {
+        led.plot(col, y)
+    }
+}
+
+// --- relay volante/câmbio (rádio → USB, mesmo protocolo) ---
+radio.onReceivedValue(function (name: string, value: number) {
+    if (name == "STEER") {
+        serial.writeLine("STEER:" + value)
+    }
+})
+radio.onReceivedString(function (msg: string) {
+    if (msg == "GEAR:UP" || msg == "GEAR:DOWN"
+        || msg == "SHIFT:UP" || msg == "SHIFT:DOWN"
+        || msg == "MODE:AUTO" || msg == "MODE:MANUAL"
+        || msg == "HANDBRAKE:ON" || msg == "HANDBRAKE:OFF") {
+        serial.writeLine(msg)
+    }
+})
+
+// --- pedais locais (ordem do carro: embreagem, freio, acel) ---
+basic.forever(function () {
+    let embreagem = lerMM(DigitalPin.P2)
+    let freio = lerMM(DigitalPin.P0)
+    let acel = lerMM(DigitalPin.P1)
+
+    serial.writeLine("CLUTCH:" + Math.round(embreagem))
+    serial.writeLine("BRAKE:" + Math.round(freio))
+    serial.writeLine("ACCEL:" + Math.round(acel))
+
+    // avisa o câmbio: 1 = pisada (<=25mm), 0 = solta (só na mudança)
+    let pisada = embreagem > 0 && embreagem <= 25
+    if (pisada != embreagemAvisada) {
+        embreagemAvisada = pisada
+        radio.sendValue("CLUTCH", pisada ? 1 : 0)
+    }
+
+    basic.clearScreen()
+    barra(0, intensidade(embreagem))
+    barra(2, intensidade(freio))
+    barra(4, intensidade(acel))
+    basic.pause(30)
+})

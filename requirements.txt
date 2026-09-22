@@ -1,0 +1,8 @@
+# Hardware real (micro:bit via USB serial). O modo --simulate funciona sem isto.
+pyserial>=3.5
+
+# Gamepad virtual Linux (--gamepad). No Arch: sudo pacman -S python-evdev
+evdev>=1.6; sys_platform == "linux"
+
+# Desenvolvimento / testes (opcional; testes rodam com unittest da stdlib).
+# pytest>=7

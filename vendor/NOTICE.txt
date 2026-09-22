@@ -1,0 +1,6 @@
+pyserial 3.5 embarcado (pasta serial/) — biblioteca BSD-3 de Chris Liechti,
+https://github.com/pyserial/pyserial — para rodar sem pip no modo portátil.
+
+main.py e check.py adicionam vendor/ ao sys.path quando a pasta existe,
+então nenhuma instalação é necessária. Se o sistema já tiver pyserial,
+a versão embarcada (idêntica, 3.5) é usada sem conflito.

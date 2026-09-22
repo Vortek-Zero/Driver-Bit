@@ -1,0 +1,68 @@
+VOLANTE — direção + modo + freio de mão (rádio + serial)
+============================================================
+Placa: a do volante (bússola + botões). Pode usar BATERIA (sem fio);
+se espetar o USB, a serial funciona como fallback automático.
+
+COMO GRAVAR:
+1. makecode.microbit.org → novo projeto → visão JavaScript.
+2. Extensões (engrenagem/roda dentada → Extensões): adicione "radio".
+3. Apague tudo, cole o código abaixo, Download → arraste o .hex.
+
+CONTROLES:
+- Girar a placa = direção (bússola, 1° de precisão, 25 leituras/s).
+- Botão A = alterna MANUAL ↔ AUTOMÁTICO (LED canto superior direito
+  aceso = AUTOMÁTICO).
+- Botão B = alterna freio de mão ON/OFF (LED canto superior esquerdo
+  aceso = PUXADO).
+
+CONVENÇÃO DE RÁDIO (igual nas 3 placas — NÃO MUDE):
+grupo 7, potência 7, valor "STEER"=<graus>, textos "MODE:AUTO",
+"MODE:MANUAL", "HANDBRAKE:ON", "HANDBRAKE:OFF".
+
+------------------------------------------------------------
+let graus = 0
+let automatico = false
+let maoPuxado = false
+
+radio.setGroup(7)
+radio.setTransmitPower(7)
+serial.redirect(
+    SerialPin.USB_TX,
+    SerialPin.USB_RX,
+    BaudRate.BaudRate115200
+)
+input.calibrateCompass()
+basic.showIcon(IconNames.Yes)
+
+basic.forever(function () {
+    graus = input.compassHeading()
+    radio.sendValue("STEER", graus)
+    serial.writeLine("STEER:" + graus)
+    basic.pause(40)
+})
+
+input.onButtonPressed(Button.A, function () {
+    automatico = !(automatico)
+    if (automatico) {
+        radio.sendString("MODE:AUTO")
+        serial.writeLine("MODE:AUTO")
+        led.plot(4, 0)
+    } else {
+        radio.sendString("MODE:MANUAL")
+        serial.writeLine("MODE:MANUAL")
+        led.unplot(4, 0)
+    }
+})
+
+input.onButtonPressed(Button.B, function () {
+    maoPuxado = !(maoPuxado)
+    if (maoPuxado) {
+        radio.sendString("HANDBRAKE:ON")
+        serial.writeLine("HANDBRAKE:ON")
+        led.plot(0, 0)
+    } else {
+        radio.sendString("HANDBRAKE:OFF")
+        serial.writeLine("HANDBRAKE:OFF")
+        led.unplot(0, 0)
+    }
+})

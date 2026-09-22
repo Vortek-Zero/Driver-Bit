@@ -1,0 +1,23 @@
+{
+  "port": "auto",
+  "baud": 115200,
+  "host": "127.0.0.1",
+  "http_port": 8123,
+  "max_angle_deg": 90.0,
+  "deadzone": 0.05,
+  "smoothing": 0.35,
+  "gear_flash_ms": 400,
+  "pedal_far_mm": 50.0,
+  "pedal_near_mm": 20.0,
+  "pedal_smoothing": 0.5,
+  "browser": false,
+  "keys": {
+    "left": "left",
+    "right": "right",
+    "accel": "up",
+    "brake": "down",
+    "shift_up": "e",
+    "shift_down": "q",
+    "handbrake": "space"
+  }
+}

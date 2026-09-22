@@ -1,0 +1,50 @@
+name: CI + exe
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  test:
+    name: testes (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: dependências
+        run: pip install pyserial pytest
+      - name: pytest
+        run: python -m pytest -q
+
+  build-exe:
+    name: WheelBridge.exe (Windows)
+    needs: test
+    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: dependências
+        run: pip install pyinstaller pyserial
+      - name: build
+        run: pyinstaller WheelBridge.spec
+      - name: artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: WheelBridge-windows
+          path: dist/WheelBridge.exe
+      - name: anexar à release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/WheelBridge.exe

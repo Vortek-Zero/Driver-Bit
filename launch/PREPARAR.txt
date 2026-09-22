@@ -1,0 +1,36 @@
+WheelBridge portátil (Windows 10, máquina escolar sem instalação)
+====================================================================
+
+COMO PREPARAR O PENDRIVE (uma única vez, em qualquer PC com internet):
+
+1. Copie a pasta inteira do projeto para o pendrive. Ela já contém:
+   - main.py, check.py, config.json
+   - pastas core/, inputs/, outputs/, server/, tests/, microbit/
+   - pasta vendor/ (pyserial embarcado — sem pip, sem instalar nada)
+
+2. Python portátil (sem instalar no PC da escola):
+   a. Baixe "Windows embeddable package (64-bit)" em python.org/downloads
+      (arquivo python-3.12.x-embed-amd64.zip, ~10 MB).
+   b. Descompacte DENTRO de launch\python-portatil\ do pendrive, de modo que
+      launch\python-portatil\python.exe exista.
+   c. Pronto. Se essa pasta não existir, o INICIAR.bat usa o Python do
+      sistema como fallback.
+
+COMO USAR NA ESCOLA (o "F5"):
+
+1. Espete o pendrive + o micro:bit HUB no USB.
+2. Duplo clique em launch\INICIAR.bat.
+3. Ele verifica tudo (placas, protocolo, porta) e mostra [OK]/[FALHOU].
+4. Se passar, inicia sozinho + abre o dashboard no navegador.
+5. Calibre o centro no dashboard e abra o Slow Roads.
+
+SEM TERMINAL: nenhum comando é digitado; a janela mostra o progresso.
+SEM INSTALAÇÃO: nada é instalado (Python roda da pasta, teclas via
+Windows padrão, sem driver). Nada é gravado fora do pendrive, exceto
+a janela do navegador.
+
+SAÍDA NO WINDOWS: teclado virtual (setas/WASD via mapa "keys" do
+config.json). Direção e pedais usam PWM proporcional. Gamepad virtual
+(uinput) é exclusivo do Linux — no Windows bloqueado ele exigiria
+instalar driver (admin), por isso o teclado é o caminho portátil.
+No Slow Roads, as teclas podem ser remapeadas em Settings → Controls.

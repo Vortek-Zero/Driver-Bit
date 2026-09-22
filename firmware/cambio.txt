@@ -1,0 +1,56 @@
+CÂMBIO sequencial — sobe/desce marcha (só embreado)
+============================================================
+Placa: a terceira (alavanca/botões). Pode usar BATERIA (sem fio).
+
+CONTROLES:
+- Botão A = SOBE marcha (SHIFT:UP).
+- Botão B = DESCE marcha (SHIFT:DOWN).
+- REGRA DE CARRO REAL: só troca com a EMBREAGEM PRESSIONADA. O hub
+  avisa o estado da embreagem por rádio; sem aviso recente, a troca é
+  negada (X na matriz). Com embreagem: ✓ na matriz.
+
+COMO GRAVAR:
+1. makecode.microbit.org → novo projeto → visão JavaScript.
+2. Extensões: adicione "radio".
+3. Apague tudo, cole o código abaixo, Download → arraste o .hex.
+
+RÁDIO (grupo 7, igual às outras — NÃO MUDE):
+  recebe: valor "CLUTCH" = 1/0 (do hub).
+  envia: texto "SHIFT:UP" / "SHIFT:DOWN".
+
+------------------------------------------------------------
+let embreagem = false
+let embreagemVista = 0
+
+radio.setGroup(7)
+radio.setTransmitPower(7)
+basic.showIcon(IconNames.Yes)
+
+radio.onReceivedValue(function (name: string, value: number) {
+    if (name == "CLUTCH") {
+        embreagem = value == 1
+        embreagemVista = input.runningTime()
+    }
+})
+
+function podeTrocar(): boolean {
+    return embreagem && input.runningTime() - embreagemVista < 1500
+}
+
+input.onButtonPressed(Button.A, function () {
+    if (podeTrocar()) {
+        radio.sendString("SHIFT:UP")
+        basic.showIcon(IconNames.Yes)
+    } else {
+        basic.showIcon(IconNames.No)
+    }
+})
+
+input.onButtonPressed(Button.B, function () {
+    if (podeTrocar()) {
+        radio.sendString("SHIFT:DOWN")
+        basic.showIcon(IconNames.Yes)
+    } else {
+        basic.showIcon(IconNames.No)
+    }
+})

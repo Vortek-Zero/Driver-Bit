@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>WheelBridge — Painel de Teste</title>
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+<header>
+  <h1>WheelBridge <span class="sub">painel de teste (sem jogos)</span></h1>
+  <div id="conn" class="badge offline">desconectado</div>
+</header>
+
+<main>
+  <section class="card wheel-card">
+    <h2>Volante</h2>
+    <div class="wheel-labels"><span>ESQUERDA −1.0</span><span>CENTRO 0.0</span><span>+1.0 DIREITA</span></div>
+    <div id="track" class="track">
+      <div class="tick center-tick"></div>
+      <div id="marker" class="marker" style="left:50%">●</div>
+    </div>
+    <div class="steer-num"><span id="steer">0.000</span></div>
+  </section>
+
+  <section class="card">
+    <h2>Pedais (ordem do carro)</h2>
+    <div class="pedal"><span class="pname">EMBR</span><div class="pbar"><div id="clutch-fill" class="pfill clutch"></div></div><b id="clutch-v">0%</b></div>
+    <div class="pedal"><span class="pname">FREIO</span><div class="pbar"><div id="brake-fill" class="pfill brake"></div></div><b id="brake-v">0%</b></div>
+    <div class="pedal"><span class="pname">ACEL</span><div class="pbar"><div id="accel-fill" class="pfill accel"></div></div><b id="accel-v">0%</b></div>
+  </section>
+
+  <section class="card">
+    <h2>Telemetria</h2>
+    <dl class="grid">
+      <dt>ângulo bruto</dt><dd><span id="raw">—</span> °</dd>
+      <dt>centro calibrado</dt><dd><span id="center">—</span> °</dd>
+      <dt>ângulo relativo</dt><dd><span id="rel">—</span> °</dd>
+      <dt>steering</dt><dd><span id="steer2">—</span></dd>
+      <dt>marcha UP</dt><dd><span id="up" class="pill">solto</span> <small id="upc">0</small></dd>
+      <dt>marcha DOWN</dt><dd><span id="down" class="pill">solto</span> <small id="downc">0</small></dd>
+      <dt>câmbio +</dt><dd><span id="shup" class="pill">solto</span> <small id="shupc">0</small></dd>
+      <dt>câmbio −</dt><dd><span id="shdown" class="pill">solto</span> <small id="shdownc">0</small></dd>
+      <dt>modo</dt><dd><span id="mode" class="pill">MANUAL</span></dd>
+      <dt>freio de mão</dt><dd><span id="hb" class="pill">solto</span></dd>
+      <dt>dispositivo</dt><dd><span id="port">—</span></dd>
+      <dt>transporte</dt><dd><span id="transport">conectando…</span></dd>
+    </dl>
+    <div class="row">
+      <button id="btn-cal">Calibrar centro (segurar ~2s parado)</button>
+      <button id="btn-reset" class="ghost">Limpar calibração</button>
+    </div>
+    <div id="capwrap" class="capwrap" hidden>
+      <div class="capbar"><div id="capfill" class="capfill"></div></div>
+      <div class="row"><small id="captext">capturando…</small><button id="btn-capcancel" class="ghost">Cancelar</button></div>
+    </div>
+    <h2 class="mt">Trava-a-trava (sem precisar acertar o zero)</h2>
+    <p class="hint">Gire tudo p/ a esquerda e marque, depois tudo p/ a direita e marque. O centro e o curso são calculados.</p>
+    <div class="row">
+      <button id="btn-lock-l" class="ghost">1 · Marcar esquerda máxima</button>
+      <button id="btn-lock-r" class="ghost">2 · Marcar direita máxima</button>
+    </div>
+    <div class="row">
+      <button id="btn-lock-go">Concluir trava-a-trava</button>
+      <button id="btn-lock-clear" class="ghost">Limpar marcas</button>
+    </div>
+    <p class="hint">marcas: esq <b id="mark-l">—</b> · dir <b id="mark-r">—</b></p>
+    <div class="row">
+      <button id="btn-up" class="ghost">Simular GEAR:UP</button>
+      <button id="btn-down" class="ghost">Simular GEAR:DOWN</button>
+    </div>
+    <div class="row">
+      <button id="btn-shup" class="ghost">Simular SHIFT:UP</button>
+      <button id="btn-shdown" class="ghost">Simular SHIFT:DOWN</button>
+    </div>
+    <div class="row">
+      <button id="btn-mode" class="ghost">Alternar MANUAL/AUTO</button>
+      <button id="btn-hb" class="ghost">Alternar freio de mão</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Configuração</h2>
+    <form id="cfg" class="grid">
+      <label>ângulo máximo / lado (°)<input id="cfg-max" type="number" min="1" max="180" step="1" /></label>
+      <label>zona morta (0–0.9)<input id="cfg-dz" type="number" min="0" max="0.9" step="0.01" /></label>
+      <label>suavização (0–1)<input id="cfg-sm" type="number" min="0.01" max="1" step="0.01" /></label>
+      <button type="submit">Aplicar</button>
+    </form>
+    <p id="msg" class="msg"></p>
+  </section>
+</main>
+
+<footer>
+  <small>Lógica no backend Python · navegador é só visualização · <code>STEER:&lt;graus&gt;</code> + <code>GEAR:UP/DOWN</code></small>
+</footer>
+
+<script src="/app.js"></script>
+</body>
+</html>
