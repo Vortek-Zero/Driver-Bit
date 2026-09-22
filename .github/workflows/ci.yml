@@ -32,6 +32,8 @@ jobs:
     needs: test
     if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
     runs-on: windows-latest
+    permissions:
+      contents: write  # anexar o .exe na release
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
