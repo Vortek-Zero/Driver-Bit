@@ -1,6 +1,9 @@
 """Testes da saída gamepad virtual (sem hardware, sem /dev/uinput)."""
 
+import importlib.util
 import unittest
+
+import pytest
 
 from core.models import WheelState
 from outputs.uinput_gamepad import (
@@ -9,6 +12,9 @@ from outputs.uinput_gamepad import (
     check_gamepad_requirements,
     steering_to_abs,
 )
+
+HAS_EVDEV = importlib.util.find_spec("evdev") is not None
+needs_evdev = pytest.mark.skipif(not HAS_EVDEV, reason="sem evdev nesta máquina")
 
 
 class FakeUI:
@@ -63,6 +69,7 @@ class TestUinputGamepadFake(unittest.TestCase):
         pad.start()
         return pad, fakes[0]
 
+    @needs_evdev
     def test_perfil_xbox(self):
         pad, fake = self._pad()
         self.assertEqual(fake.kwargs["vendor"], 0x045E)
@@ -74,6 +81,7 @@ class TestUinputGamepadFake(unittest.TestCase):
         pad.stop()
         self.assertTrue(fake.closed)
 
+    @needs_evdev
     def test_publica_eixo(self):
         from evdev import ecodes
 
@@ -86,6 +94,7 @@ class TestUinputGamepadFake(unittest.TestCase):
         self.assertGreaterEqual(fake.syncs, 1)
         pad.stop()
 
+    @needs_evdev
     def test_publica_gatilhos(self):
         from evdev import ecodes
         from outputs.uinput_gamepad import pedal_to_trigger as p2t
@@ -98,6 +107,7 @@ class TestUinputGamepadFake(unittest.TestCase):
         self.assertEqual(trig[ecodes.ABS_RZ], 255)
         pad.stop()
 
+    @needs_evdev
     def test_botoes_up_down(self):
         from evdev import ecodes
 
@@ -118,6 +128,7 @@ class TestUinputGamepadFake(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             UinputGamepad(ui_factory=FakeUI).publish(WheelState())
 
+    @needs_evdev
     def test_stop_solta_botoes(self):
         from evdev import ecodes
 
@@ -131,8 +142,11 @@ class TestUinputGamepadFake(unittest.TestCase):
 
 class TestPreflight(unittest.TestCase):
     def test_retorna_lista(self):
-        # Neste ambiente evdev + /dev/uinput existem → sem problemas.
-        self.assertEqual(check_gamepad_requirements(), [])
+        problems = check_gamepad_requirements()
+        if HAS_EVDEV:
+            self.assertEqual(problems, [])
+        else:
+            self.assertTrue(any("evdev" in item for item in problems))
 
 
 if __name__ == "__main__":

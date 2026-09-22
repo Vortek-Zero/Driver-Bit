@@ -21,6 +21,9 @@ jobs:
           python-version: "3.12"
       - name: dependências
         run: pip install pyserial pytest
+      - name: dependências Linux (gamepad)
+        if: matrix.os == 'ubuntu-latest'
+        run: pip install evdev
       - name: pytest
         run: python -m pytest -q
 

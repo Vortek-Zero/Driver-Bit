@@ -1,9 +1,15 @@
 """Testes do câmbio sequencial, embreagem, modo e freio de mão."""
 
+import importlib.util
 import unittest
+
+import pytest
 
 from core.steering import SteeringProcessor
 from inputs.microbit_serial import parse_line
+
+HAS_EVDEV = importlib.util.find_spec("evdev") is not None
+needs_evdev = pytest.mark.skipif(not HAS_EVDEV, reason="sem evdev nesta máquina")
 
 
 class TestParseShifter(unittest.TestCase):
@@ -93,6 +99,7 @@ class TestModeHandbrake(unittest.TestCase):
 
 class TestShifterOutputs(unittest.TestCase):
     def test_gamepad_shift_e_clutch(self):
+        pytest.importorskip("evdev")
         from evdev import ecodes
 
         from core.models import WheelState
