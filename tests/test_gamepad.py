@@ -142,11 +142,15 @@ class TestUinputGamepadFake(unittest.TestCase):
 
 class TestPreflight(unittest.TestCase):
     def test_retorna_lista(self):
+        # Sem hardware não há o que afirmar além do formato: aqui []
+        # (evdev+uinput OK), no CI sem /dev/uinput ou sem evdev há itens.
         problems = check_gamepad_requirements()
-        if HAS_EVDEV:
-            self.assertEqual(problems, [])
-        else:
+        self.assertIsInstance(problems, list)
+        if not HAS_EVDEV:
             self.assertTrue(any("evdev" in item for item in problems))
+        for item in problems:
+            self.assertIsInstance(item, str)
+            self.assertGreater(len(item), 10)
 
 
 if __name__ == "__main__":
